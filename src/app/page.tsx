@@ -1,0 +1,25 @@
+import { createSupabaseServerClient } from "@/services/supabase-server";
+import { GameSelector } from "@/components/game-selector";
+
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const supabase = createSupabaseServerClient();
+  const today = new Date().toISOString().split("T")[0];
+
+  const { data: games } = await supabase
+    .from("games")
+    .select("*")
+    .eq("game_date", today)
+    .order("start_time_utc", { ascending: true });
+
+  return (
+    <main className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-2">NHL Shot Heatmap</h1>
+      <p className="text-base-content/70 mb-8">
+        Real-time hexagonal shot charts for today&apos;s games
+      </p>
+      <GameSelector initialGames={games ?? []} />
+    </main>
+  );
+}

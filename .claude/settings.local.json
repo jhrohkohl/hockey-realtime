@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api-web.nhle.com)",
+      "Bash(find \"c:\\\\Users\\\\jhroh\\\\Desktop\\\\hockey-realtime\" -type f -exec ls -lh {} ;)",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(data[0][''text'']\\)\")",
+      "Bash(python -c \"import sys,json; data=json.load\\(sys.stdin\\); print\\(data[0][''text'']\\)\")",
+      "Bash(npm install @supabase/supabase-js @supabase/ssr d3-hexbin d3-scale d3-interpolate d3-color daisyui@latest)",
+      "Bash(npm install --save-dev @biomejs/biome @types/d3-hexbin @types/d3-scale @types/d3-interpolate @types/d3-color)",
+      "Bash(npm install d3-scale-chromatic)",
+      "Bash(npm install --save-dev @types/d3-scale-chromatic)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npm run build)"
+    ]
+  }
+}
