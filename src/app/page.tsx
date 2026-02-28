@@ -1,36 +1,37 @@
-import Link from "next/link";
+import { Suspense } from "react";
 import { createSupabaseServerClient } from "@/services/supabase-server";
-import { GameSelector } from "@/components/game-selector";
+import { GameGrid } from "@/components/game-grid";
+import { GameGridSkeleton } from "@/components/game-card-skeleton";
 
 export const dynamic = "force-dynamic";
 
-export default async function HomePage() {
-  const supabase = createSupabaseServerClient();
-  // NHL game dates are in Eastern Time
-  const today = new Date(
-    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
-  )
-    .toISOString()
-    .split("T")[0];
+interface HomePageProps {
+  searchParams: Promise<{ date?: string }>;
+}
 
+function getTodayET(): string {
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
+  );
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+export default async function HomePage(props: HomePageProps) {
+  const searchParams = await props.searchParams;
+  const date = searchParams.date || getTodayET();
+
+  const supabase = createSupabaseServerClient();
   const { data: games } = await supabase
     .from("games")
     .select("*")
-    .eq("game_date", today)
+    .eq("game_date", date)
     .order("start_time_utc", { ascending: true });
 
   return (
-    <main className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-2">
-        <h1 className="text-3xl font-bold">NHL Shot Heatmap</h1>
-        <Link href="/history" className="btn btn-ghost btn-sm">
-          All Games &rarr;
-        </Link>
-      </div>
-      <p className="text-base-content/70 mb-8">
-        Real-time hexagonal shot charts for today&apos;s games
-      </p>
-      <GameSelector initialGames={games ?? []} />
+    <main className="mx-auto max-w-7xl px-4 sm:px-6 py-6">
+      <Suspense fallback={<GameGridSkeleton />}>
+        <GameGrid initialGames={games ?? []} date={date} />
+      </Suspense>
     </main>
   );
 }

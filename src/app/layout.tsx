@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Geist_Mono } from "next/font/google";
+import { NavBar } from "@/components/nav-bar";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -13,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NHL Shot Heatmap",
+  title: "Shot Hex — NHL Shot Heatmaps",
   description: "Real-time hexagonal shot charts for NHL games",
 };
 
@@ -25,8 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-base-300 text-base-content`}
+        className={`${spaceGrotesk.variable} ${geistMono.variable} font-sans antialiased min-h-screen bg-sh-bg text-sh-text`}
       >
+        <NavBar />
         {children}
       </body>
     </html>
