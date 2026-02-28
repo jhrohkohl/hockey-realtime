@@ -84,7 +84,7 @@ export function HalfRinkHeatmap({
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      const binShots = bin as ShotPoint[];
+      const binShots = bin as unknown as ShotPoint[];
       const goals = binShots.filter(
         (p) => p._shot.type_code === SHOT_TYPE_CODES.GOAL
       ).length;
