@@ -4,6 +4,8 @@ import {
   fetchScoreByDate,
   fetchPlayByPlay,
   extractShotEvents,
+  fetchShiftChart,
+  extractShiftInserts,
 } from "@/services/nhl-api";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -38,6 +40,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   const encoder = new TextEncoder();
   let totalGames = 0;
   let totalShots = 0;
+  let totalShifts = 0;
   let errorCount = 0;
 
   const stream = new ReadableStream({
@@ -84,7 +87,7 @@ export async function POST(request: NextRequest): Promise<Response> {
               try {
                 await delay(300); // throttle between play-by-play fetches
                 const pbp = await fetchPlayByPlay(game.id);
-                const shotInserts = extractShotEvents(pbp.plays, game.id);
+                const shotInserts = extractShotEvents(pbp.plays, game.id, pbp.homeTeam.id);
 
                 if (shotInserts.length > 0) {
                   await supabase.from("shot_events").upsert(shotInserts, {
@@ -93,6 +96,22 @@ export async function POST(request: NextRequest): Promise<Response> {
                   });
                   totalShots += shotInserts.length;
                 }
+
+                try {
+                  await delay(200);
+                  const shiftRecords = await fetchShiftChart(game.id);
+                  const shiftInserts = extractShiftInserts(shiftRecords, game.id);
+                  if (shiftInserts.length > 0) {
+                    await supabase.from("shifts").upsert(shiftInserts, {
+                      onConflict: "id",
+                      ignoreDuplicates: true,
+                    });
+                    totalShifts += shiftInserts.length;
+                  }
+                } catch {
+                  // Non-fatal: shifts are enrichment data
+                }
+
                 totalGames++;
               } catch (err) {
                 // Retry once on 429
@@ -100,7 +119,7 @@ export async function POST(request: NextRequest): Promise<Response> {
                   await delay(5000);
                   try {
                     const pbp = await fetchPlayByPlay(game.id);
-                    const shotInserts = extractShotEvents(pbp.plays, game.id);
+                    const shotInserts = extractShotEvents(pbp.plays, game.id, pbp.homeTeam.id);
                     if (shotInserts.length > 0) {
                       await supabase.from("shot_events").upsert(shotInserts, {
                         onConflict: "game_id,event_id",
@@ -108,6 +127,22 @@ export async function POST(request: NextRequest): Promise<Response> {
                       });
                       totalShots += shotInserts.length;
                     }
+
+                    try {
+                      await delay(200);
+                      const shiftRecords = await fetchShiftChart(game.id);
+                      const shiftInserts = extractShiftInserts(shiftRecords, game.id);
+                      if (shiftInserts.length > 0) {
+                        await supabase.from("shifts").upsert(shiftInserts, {
+                          onConflict: "id",
+                          ignoreDuplicates: true,
+                        });
+                        totalShifts += shiftInserts.length;
+                      }
+                    } catch {
+                      // Non-fatal
+                    }
+
                     totalGames++;
                   } catch {
                     errorCount++;
@@ -119,7 +154,7 @@ export async function POST(request: NextRequest): Promise<Response> {
             }
           }
 
-          const progress = `${dateStr}: ${finishedGames.length} games (total: ${totalGames} games, ${totalShots} shots)\n`;
+          const progress = `${dateStr}: ${finishedGames.length} games (total: ${totalGames} games, ${totalShots} shots, ${totalShifts} shifts)\n`;
           controller.enqueue(encoder.encode(progress));
         } catch (err) {
           // Retry date fetch on 429
@@ -160,7 +195,7 @@ export async function POST(request: NextRequest): Promise<Response> {
                   try {
                     await delay(500);
                     const pbp = await fetchPlayByPlay(game.id);
-                    const shotInserts = extractShotEvents(pbp.plays, game.id);
+                    const shotInserts = extractShotEvents(pbp.plays, game.id, pbp.homeTeam.id);
                     if (shotInserts.length > 0) {
                       await supabase.from("shot_events").upsert(shotInserts, {
                         onConflict: "game_id,event_id",
@@ -168,6 +203,22 @@ export async function POST(request: NextRequest): Promise<Response> {
                       });
                       totalShots += shotInserts.length;
                     }
+
+                    try {
+                      await delay(200);
+                      const shiftRecords = await fetchShiftChart(game.id);
+                      const shiftInserts = extractShiftInserts(shiftRecords, game.id);
+                      if (shiftInserts.length > 0) {
+                        await supabase.from("shifts").upsert(shiftInserts, {
+                          onConflict: "id",
+                          ignoreDuplicates: true,
+                        });
+                        totalShifts += shiftInserts.length;
+                      }
+                    } catch {
+                      // Non-fatal
+                    }
+
                     totalGames++;
                   } catch {
                     errorCount++;
@@ -175,7 +226,7 @@ export async function POST(request: NextRequest): Promise<Response> {
                 }
               }
 
-              const progress = `${dateStr}: ${finishedGames.length} games (retry ok, total: ${totalGames} games, ${totalShots} shots)\n`;
+              const progress = `${dateStr}: ${finishedGames.length} games (retry ok, total: ${totalGames} games, ${totalShots} shots, ${totalShifts} shifts)\n`;
               controller.enqueue(encoder.encode(progress));
             } catch {
               controller.enqueue(
@@ -194,7 +245,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         current.setDate(current.getDate() + 1);
       }
 
-      const summary = `\nDone! ${totalGames} games, ${totalShots} shots, ${errorCount} errors\n`;
+      const summary = `\nDone! ${totalGames} games, ${totalShots} shots, ${totalShifts} shifts, ${errorCount} errors\n`;
       controller.enqueue(encoder.encode(summary));
       controller.close();
     },

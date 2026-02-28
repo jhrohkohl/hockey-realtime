@@ -6,10 +6,18 @@ import type { GameRow } from "@/types/database";
 
 interface GameSelectorProps {
   initialGames: GameRow[];
+  date?: string;
 }
 
-export function GameSelector({ initialGames }: GameSelectorProps) {
-  const { games } = useGamesToday(initialGames);
+function getTodayET(): string {
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" }),
+  );
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
+
+export function GameSelector({ initialGames, date }: GameSelectorProps) {
+  const { games } = useGamesToday(initialGames, date ?? getTodayET());
 
   if (games.length === 0) {
     return (

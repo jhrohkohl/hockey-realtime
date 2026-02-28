@@ -5,8 +5,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
-  { href: "/", label: "Games" },
-  { href: "/history", label: "Heatmaps" },
+  { href: "/", label: "Today's Games" },
+  { href: "/league", label: "League" },
+  { href: "/history", label: "Historical" },
 ] as const;
 
 function HexIcon({ className }: { className?: string }) {
@@ -62,7 +63,7 @@ export function NavBar() {
             </span>
           </Link>
 
-          {/* Center — nav links (desktop) */}
+          {/* Right — nav links (desktop) */}
           <div className="hidden md:flex items-center gap-1">
             {NAV_LINKS.map((link) => {
               const active = pathname === link.href;
@@ -81,9 +82,6 @@ export function NavBar() {
               );
             })}
           </div>
-
-          {/* Right — placeholder for future controls (desktop) */}
-          <div className="hidden md:block w-[88px]" />
 
           {/* Mobile hamburger */}
           <button

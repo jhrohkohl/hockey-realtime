@@ -39,9 +39,29 @@ export interface ShotEventRow {
   shooter_player_id: number | null;
   goalie_player_id: number | null;
   home_team_defending_side: string | null;
+  strength: string | null;
   created_at: string;
 }
 
 /** Insert type (omit auto-generated fields) */
 export type ShotEventInsert = Omit<ShotEventRow, "id" | "created_at">;
 export type GameUpsert = Omit<GameRow, "created_at" | "updated_at">;
+
+/** Row type for the shifts table */
+export interface ShiftRow {
+  id: number;
+  game_id: number;
+  player_id: number;
+  first_name: string;
+  last_name: string;
+  team_id: number;
+  team_abbrev: string;
+  period: number;
+  start_seconds: number;
+  end_seconds: number;
+  duration: number | null;
+  shift_number: number;
+  created_at: string;
+}
+
+export type ShiftInsert = Omit<ShiftRow, "created_at">;

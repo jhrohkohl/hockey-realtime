@@ -47,6 +47,7 @@ CREATE TABLE shot_events (
   shooter_player_id INTEGER,
   goalie_player_id INTEGER,
   home_team_defending_side TEXT,
+  strength TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
 
   UNIQUE(game_id, event_id)

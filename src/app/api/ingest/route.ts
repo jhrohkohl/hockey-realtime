@@ -5,6 +5,8 @@ import {
   fetchPlayByPlay,
   extractShotEvents,
   fetchScoreByDate,
+  fetchShiftChart,
+  extractShiftInserts,
 } from "@/services/nhl-api";
 
 const POLLABLE_STATES = ["LIVE", "CRIT", "OFF", "FINAL"] as const;
@@ -52,20 +54,45 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     let totalShotEvents = 0;
+    let totalShifts = 0;
     const finishedGames = scoreData.games.filter(
       (g) => g.gameState === "OFF" || g.gameState === "FINAL"
     );
 
     for (const game of finishedGames) {
       const pbp = await fetchPlayByPlay(game.id);
-      const shotInserts = extractShotEvents(pbp.plays, game.id);
+      const shotInserts = extractShotEvents(pbp.plays, game.id, pbp.homeTeam.id);
 
       if (shotInserts.length > 0) {
+        // Update existing rows on conflict (handles typeCode changes, e.g. 505→506
+        // when a goal is challenged and reversed).
         await supabase.from("shot_events").upsert(shotInserts, {
           onConflict: "game_id,event_id",
-          ignoreDuplicates: true,
         });
+
+        // Reconcile: delete events no longer present in the NHL PBP feed.
+        // This handles reversed goals that get removed entirely from the data.
+        const currentEventIds = shotInserts.map((s) => s.event_id);
+        await supabase
+          .from("shot_events")
+          .delete()
+          .eq("game_id", game.id)
+          .not("event_id", "in", `(${currentEventIds.join(",")})`);
+
         totalShotEvents += shotInserts.length;
+      }
+
+      try {
+        const shiftRecords = await fetchShiftChart(game.id);
+        const shiftInserts = extractShiftInserts(shiftRecords, game.id);
+        if (shiftInserts.length > 0) {
+          await supabase.from("shifts").upsert(shiftInserts, {
+            onConflict: "id",
+          });
+          totalShifts += shiftInserts.length;
+        }
+      } catch (err) {
+        console.warn(`Shift chart fetch failed for game ${game.id}:`, err);
       }
     }
 
@@ -73,6 +100,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       ok: true,
       gamesSeeded: finishedGames.length,
       totalShotEvents,
+      totalShifts,
     });
   } catch (error) {
     console.error("Seed error:", error);
@@ -127,17 +155,39 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     );
 
     let totalShotEvents = 0;
+    let totalShifts = 0;
 
     for (const game of pollableGames) {
       const pbp = await fetchPlayByPlay(game.id);
-      const shotInserts = extractShotEvents(pbp.plays, game.id);
+      const shotInserts = extractShotEvents(pbp.plays, game.id, pbp.homeTeam.id);
 
       if (shotInserts.length > 0) {
         await supabase.from("shot_events").upsert(shotInserts, {
           onConflict: "game_id,event_id",
-          ignoreDuplicates: true,
         });
+
+        // Reconcile stale events (challenged/reversed goals removed from PBP)
+        const currentEventIds = shotInserts.map((s) => s.event_id);
+        await supabase
+          .from("shot_events")
+          .delete()
+          .eq("game_id", game.id)
+          .not("event_id", "in", `(${currentEventIds.join(",")})`);
+
         totalShotEvents += shotInserts.length;
+      }
+
+      try {
+        const shiftRecords = await fetchShiftChart(game.id);
+        const shiftInserts = extractShiftInserts(shiftRecords, game.id);
+        if (shiftInserts.length > 0) {
+          await supabase.from("shifts").upsert(shiftInserts, {
+            onConflict: "id",
+          });
+          totalShifts += shiftInserts.length;
+        }
+      } catch (err) {
+        console.warn(`Shift chart fetch failed for game ${game.id}:`, err);
       }
     }
 
@@ -146,6 +196,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       gamesPolled: pollableGames.length,
       totalGames: scoreData.games.length,
       totalShotEvents,
+      totalShifts,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {

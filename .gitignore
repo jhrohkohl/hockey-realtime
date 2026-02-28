@@ -42,3 +42,5 @@ next-env.d.ts
 
 # seed logs
 seed-progress.log
+
+.vercel

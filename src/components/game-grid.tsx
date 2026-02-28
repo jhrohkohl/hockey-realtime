@@ -62,7 +62,7 @@ function SectionHeading({
 
 export function GameGrid({ initialGames, date }: GameGridProps) {
   const router = useRouter();
-  const { games } = useGamesToday(initialGames);
+  const { games } = useGamesToday(initialGames, date);
   const todayET = getTodayET();
 
   const [liveOnly, setLiveOnly] = useState(false);
@@ -95,8 +95,13 @@ export function GameGrid({ initialGames, date }: GameGridProps) {
 
   const hasAnyLive = games.some((g) => isGameLive(g.game_state));
 
+  // Cap forward navigation at 7 days from today
+  const maxDate = shiftDate(todayET, 7);
+  const atMaxDate = date >= maxDate;
+
   function navigateDate(offset: number) {
     const next = shiftDate(date, offset);
+    if (offset > 0 && next > maxDate) return;
     router.push(`/?date=${next}`);
   }
 
@@ -118,19 +123,16 @@ export function GameGrid({ initialGames, date }: GameGridProps) {
           </button>
           <span className="glass-pill glass-pill-active px-4 py-1.5 text-sm font-medium text-sh-text tabular-nums min-w-[110px] text-center">
             {formatDateLabel(date, todayET)}
-            {date !== todayET && (
-              <span className="text-sh-text-muted ml-1">
-                {new Date(`${date}T12:00:00`).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </span>
-            )}
           </span>
           <button
             type="button"
             onClick={() => navigateDate(1)}
-            className="glass-pill px-2.5 py-1.5 text-sh-text-muted hover:text-sh-text transition-colors"
+            disabled={atMaxDate}
+            className={`glass-pill px-2.5 py-1.5 transition-colors ${
+              atMaxDate
+                ? "text-sh-text-muted/30 cursor-default"
+                : "text-sh-text-muted hover:text-sh-text"
+            }`}
             aria-label="Next day"
           >
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

@@ -56,6 +56,17 @@ export interface NhlBroadcast {
   network: string;
 }
 
+/** Roster entry from play-by-play response */
+export interface NhlRosterSpot {
+  teamId: number;
+  playerId: number;
+  sweaterNumber: number;
+  positionCode: string;
+  firstName: { default: string };
+  lastName: { default: string };
+  headshot?: string;
+}
+
 /** Top-level response from /v1/gamecenter/{id}/play-by-play */
 export interface NhlPlayByPlayResponse {
   id: number;
@@ -72,6 +83,7 @@ export interface NhlPlayByPlayResponse {
     inIntermission: boolean;
   };
   plays: NhlPlayEvent[];
+  rosterSpots?: NhlRosterSpot[];
 }
 
 export interface NhlPlayEvent {
@@ -110,6 +122,11 @@ export interface NhlPlayDetails {
   homeScore?: number;
   awaySOG?: number;
   homeSOG?: number;
+  // Penalty-specific fields
+  descKey?: string;
+  duration?: number;
+  committedByPlayerId?: number;
+  drawnByPlayerId?: number;
 }
 
 /** Discriminated type for shot-related plays */
@@ -120,4 +137,32 @@ export interface NhlShotPlay extends NhlPlayEvent {
     yCoord: number;
     eventOwnerTeamId: number;
   };
+}
+
+/** Single shift record from the NHL shift chart API */
+export interface NhlShiftRecord {
+  id: number;
+  gameId: number;
+  playerId: number;
+  firstName: string;
+  lastName: string;
+  teamId: number;
+  teamAbbrev: string;
+  teamName: string;
+  period: number;
+  startTime: string;
+  endTime: string;
+  duration: string | null;
+  shiftNumber: number;
+  typeCode: number;
+  eventNumber: number | null;
+  eventDescription: string | null;
+  eventDetails: string | null;
+  hexValue: string | null;
+  detailCode: number | null;
+}
+
+/** Response from the NHL shift chart API */
+export interface NhlShiftChartResponse {
+  data: NhlShiftRecord[];
 }

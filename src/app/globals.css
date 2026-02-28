@@ -110,9 +110,207 @@
   color: #f87171;
 }
 
+/* ── Heatmap glass surfaces ────────────────────────────── */
+
+@utility glass-panel {
+  background: rgba(12, 14, 20, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-top-color: rgba(255, 255, 255, 0.08);
+  border-radius: 0.625rem;
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+@utility glass-capsule {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.5rem;
+  padding: 0.25rem;
+}
+
+@utility glass-chip {
+  background: #ffffff0a;
+  border: 1px solid #ffffff10;
+  border-radius: 0.375rem;
+}
+
+@utility glass-tooltip {
+  background: rgba(8, 10, 16, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-top-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
 /* ── Complex glass effects (need pseudo-elements) ──────── */
 
 @layer components {
+
+  /* Hex cell — flat-top two-stroke premium borders */
+  .hex-cell {
+    cursor: pointer;
+    transition: filter 180ms ease-out;
+  }
+
+  .hex-cell:hover {
+    filter: brightness(1.15);
+  }
+
+  .hex-outer {
+    stroke: rgba(255, 255, 255, 0.15);
+    stroke-width: 0.9px;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    paint-order: stroke fill;
+    transition:
+      stroke 180ms ease-out,
+      stroke-width 180ms ease-out,
+      fill-opacity 180ms ease-out;
+  }
+
+  .hex-inner {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.18);
+    stroke-width: 0.45px;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
+    transition:
+      stroke 180ms ease-out,
+      stroke-width 180ms ease-out;
+  }
+
+  .hex-cell:hover .hex-outer {
+    fill-opacity: 1 !important;
+    stroke: rgba(255, 255, 255, 0.28);
+    stroke-width: 1.25px;
+  }
+
+  .hex-cell:hover .hex-inner {
+    stroke: rgba(0, 0, 0, 0.25);
+    stroke-width: 0.6px;
+  }
+
+  /* Goal marker glow */
+  .goal-marker {
+    filter: drop-shadow(0 0 2px rgba(52, 211, 153, 0.5))
+      drop-shadow(0 0 6px rgba(52, 211, 153, 0.2));
+  }
+
+  .goal-ring {
+    animation: goal-pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes goal-pulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Range slider for hex size */
+  .hex-slider {
+    transition: opacity 150ms ease;
+  }
+  .hex-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffffffcc;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+  .hex-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  }
+  .hex-slider::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #ffffffcc;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Chip active state */
+  .glass-chip-active {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.15);
+    color: #ffffffeb;
+  }
+
+  /* ── Glass dropdown (player picker combobox) ────────────── */
+
+  .glass-dropdown {
+    background: rgba(12, 14, 18, 0.82);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+    padding: 6px;
+    animation: dropdown-in 150ms ease-out;
+    transform-origin: top left;
+  }
+
+  /* Specular highlight */
+  .glass-dropdown::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      165deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.015) 30%,
+      transparent 60%
+    );
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  @keyframes dropdown-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96) translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  /* Custom scrollbar for dropdown list */
+  .glass-dropdown-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+  }
+
+  .glass-dropdown-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .glass-dropdown-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .glass-dropdown-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+  }
+
+  .glass-dropdown-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
   /* Interactive card — hover lift + specular sweep */
   .glass-card-interactive {
     position: relative;

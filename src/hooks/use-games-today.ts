@@ -4,20 +4,21 @@ import { useState, useEffect } from "react";
 import { createSupabaseBrowserClient } from "@/services/supabase-browser";
 import type { GameRow } from "@/types/database";
 
-export function useGamesToday(initialGames: GameRow[]): { games: GameRow[] } {
+export function useGamesToday(initialGames: GameRow[], date: string): { games: GameRow[] } {
   const [games, setGames] = useState<GameRow[]>(initialGames);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
 
     const channel = supabase
-      .channel("games-today")
+      .channel(`games-${date}`)
       .on(
         "postgres_changes",
         {
           event: "*",
           schema: "public",
           table: "games",
+          filter: `game_date=eq.${date}`,
         },
         (payload) => {
           if (payload.eventType === "INSERT") {
@@ -38,7 +39,7 @@ export function useGamesToday(initialGames: GameRow[]): { games: GameRow[] } {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [date]);
 
   return { games };
 }

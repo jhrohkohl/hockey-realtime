@@ -20,6 +20,7 @@ export default async function HistoryPage(props: HistoryPageProps) {
   const { data: games, count } = await supabase
     .from("games")
     .select("*", { count: "exact" })
+    .in("game_state", ["OFF", "FINAL"])
     .order("game_date", { ascending: false })
     .order("start_time_utc", { ascending: true })
     .range(offset, offset + PAGE_SIZE - 1);

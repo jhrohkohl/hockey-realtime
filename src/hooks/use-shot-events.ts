@@ -22,20 +22,34 @@ export function useShotEvents(
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*",
           schema: "public",
           table: "shot_events",
           filter: `game_id=eq.${gameId}`,
         },
         (payload) => {
-          const newShot = payload.new as ShotEventRow;
-          setShots((prev) => {
-            if (prev.some((s) => s.event_id === newShot.event_id)) {
-              return prev;
+          if (payload.eventType === "INSERT") {
+            const newShot = payload.new as ShotEventRow;
+            setShots((prev) => {
+              if (prev.some((s) => s.event_id === newShot.event_id)) return prev;
+              return [...prev, newShot];
+            });
+          } else if (payload.eventType === "UPDATE") {
+            // Handles typeCode changes (e.g. goal 505 → shot-on-goal 506
+            // after a successful coach's challenge).
+            const updated = payload.new as ShotEventRow;
+            setShots((prev) =>
+              prev.map((s) => (s.event_id === updated.event_id ? updated : s)),
+            );
+          } else if (payload.eventType === "DELETE") {
+            // Handles events removed from the PBP entirely (reversed goals).
+            // Default replica identity only provides the primary key.
+            const old = payload.old as { id?: number };
+            if (old.id != null) {
+              setShots((prev) => prev.filter((s) => s.id !== old.id));
             }
-            return [...prev, newShot];
-          });
-        }
+          }
+        },
       )
       .subscribe();
 

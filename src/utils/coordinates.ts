@@ -34,6 +34,36 @@ export const HALF_RINK = {
   X_OFFSET: 100,
 } as const;
 
+/**
+ * Reorient NHL coordinates so the given team's offensive zone
+ * is always on the RIGHT (positive-x) side.
+ *
+ * Uses `home_team_defending_side` from the play-by-play event
+ * to determine which direction each team attacks.
+ *
+ * - "left"  → home defends left  → home attacks RIGHT, away attacks LEFT
+ * - "right" → home defends right → home attacks LEFT,  away attacks RIGHT
+ *
+ * When a team attacks LEFT we flip (x → −x, y → −y) so the shot
+ * renders as if the team attacks RIGHT on a full-rink SVG.
+ */
+export function orientToAttackRight(
+  nhlX: number,
+  nhlY: number,
+  teamId: number,
+  homeTeamId: number,
+  homeTeamDefendingSide: string | null,
+): [number, number] {
+  if (!homeTeamDefendingSide) return [nhlX, nhlY];
+
+  const isHome = teamId === homeTeamId;
+  const homeAttacksRight = homeTeamDefendingSide === "left";
+  const teamAttacksRight = isHome ? homeAttacksRight : !homeAttacksRight;
+
+  if (teamAttacksRight) return [nhlX, nhlY];
+  return [-nhlX, -nhlY];
+}
+
 /** Full rink dimensions in SVG units */
 export const FULL_RINK = {
   LENGTH: 200,
