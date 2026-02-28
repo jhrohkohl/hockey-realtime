@@ -11,7 +11,21 @@
       "Bash(npm install d3-scale-chromatic)",
       "Bash(npm install --save-dev @types/d3-scale-chromatic)",
       "Bash(npx tsc --noEmit)",
-      "Bash(npm run build)"
+      "Bash(npm run build)",
+      "Bash(git commit:*)",
+      "Bash(curl -s -H \"Authorization: Bearer nhl-cron-9f3c7b1a2e84f6a0742\" http://localhost:3000/api/ingest)",
+      "Bash(curl -s -H \"Authorization: Bearer nhl-cron-9f3c7b1a2e84f6a0742\" \"http://localhost:3000/api/ingest\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"https://qahjkfgyimzphxjuakop.supabase.co/rest/v1/games?select=id,game_state,home_team_abbrev,away_team_abbrev,home_score,away_score\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaGprZmd5aW16cGh4anVha29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzA0MDIsImV4cCI6MjA4NzgwNjQwMn0.A3XCJGOXP6_guFN1NbZuxhERrLwM-HLpvdrPxw0Dl7Q\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaGprZmd5aW16cGh4anVha29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzA0MDIsImV4cCI6MjA4NzgwNjQwMn0.A3XCJGOXP6_guFN1NbZuxhERrLwM-HLpvdrPxw0Dl7Q\")",
+      "Bash(curl -s -X POST -H \"Authorization: Bearer nhl-cron-9f3c7b1a2e84f6a0742\" -H \"Content-Type: application/json\" -d '{\"\"date\"\":\"\"2026-02-26\"\"}' http://localhost:3000/api/ingest)",
+      "Bash(curl -s \"https://qahjkfgyimzphxjuakop.supabase.co/rest/v1/games?select=id,game_state,home_team_abbrev,away_team_abbrev,home_score,away_score&game_date=eq.2026-02-26&limit=3\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaGprZmd5aW16cGh4anVha29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzA0MDIsImV4cCI6MjA4NzgwNjQwMn0.A3XCJGOXP6_guFN1NbZuxhERrLwM-HLpvdrPxw0Dl7Q\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaGprZmd5aW16cGh4anVha29wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIyMzA0MDIsImV4cCI6MjA4NzgwNjQwMn0.A3XCJGOXP6_guFN1NbZuxhERrLwM-HLpvdrPxw0Dl7Q\")",
+      "Bash(curl -s -N -X POST -H \"Authorization: Bearer nhl-cron-9f3c7b1a2e84f6a0742\" -H \"Content-Type: application/json\" -d '{\"\"startDate\"\":\"\"2025-10-07\"\",\"\"endDate\"\":\"\"2026-02-27\"\"}' http://localhost:3000/api/seed)",
+      "Bash(curl -s -H \"Authorization: Bearer nhl-cron-secret-2025\" \"http://localhost:3000/api/ingest\")",
+      "Bash(curl -s -X POST \"http://localhost:3000/api/seed\" -H \"Authorization: Bearer nhl-cron-secret-2025\" -H \"Content-Type: application/json\" -d '{\"\"startDate\"\":\"\"2025-10-27\"\",\"\"endDate\"\":\"\"2025-12-15\"\"}')",
+      "Bash(tee -a seed-progress.log)",
+      "Bash(curl -s -X POST \"http://localhost:3000/api/seed\" -H \"Authorization: Bearer nhl-cron-9f3c7b1a2e84f6a0742\" -H \"Content-Type: application/json\" -d '{\"\"startDate\"\":\"\"2025-11-16\"\",\"\"endDate\"\":\"\"2025-12-31\"\"}')",
+      "Bash(curl -s -X POST \"http://localhost:3000/api/seed\" -H \"Authorization: Bearer nhl-cron-9f3c7b1a2e84f6a0742\" -H \"Content-Type: application/json\" -d '{\"\"startDate\"\":\"\"2026-01-01\"\",\"\"endDate\"\":\"\"2026-02-27\"\"}')",
+      "Bash(git add -A)"
     ]
   }
 }

@@ -17,6 +17,17 @@ export async function fetchTodaysGames(): Promise<NhlScoreResponse> {
   return response.json();
 }
 
+/** Fetches scoreboard for a specific date */
+export async function fetchScoreByDate(
+  date: string
+): Promise<NhlScoreResponse> {
+  const response = await fetch(`${NHL_API_BASE}/v1/score/${date}`, {
+    cache: "no-store",
+  });
+  if (!response.ok) throw new Error(`NHL API error: ${response.status}`);
+  return response.json();
+}
+
 /** Fetches full play-by-play for a specific game */
 export async function fetchPlayByPlay(
   gameId: number

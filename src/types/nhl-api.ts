@@ -41,7 +41,8 @@ export interface NhlGame {
 export interface NhlTeam {
   id: number;
   abbrev: string;
-  commonName: { default: string };
+  name: { default: string };
+  commonName?: { default: string };
   score?: number;
   sog?: number;
   logo: string;
