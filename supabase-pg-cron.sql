@@ -17,7 +17,7 @@ BEGIN
   PERFORM net.http_get(
     url := 'https://hockey-realtime.vercel.app/api/ingest',
     headers := jsonb_build_object(
-      'Authorization', 'Bearer nhl-cron-9f3c7b1a2e84f6a0742'
+      'Authorization', 'Bearer YOUR_CRON_SECRET_HERE'
     )
   );
 END;
@@ -40,7 +40,7 @@ BEGIN
   PERFORM net.http_post(
     url := 'https://hockey-realtime.vercel.app/api/ingest',
     headers := jsonb_build_object(
-      'Authorization', 'Bearer nhl-cron-9f3c7b1a2e84f6a0742',
+      'Authorization', 'Bearer YOUR_CRON_SECRET_HERE',
       'Content-Type', 'application/json'
     ),
     body := jsonb_build_object(
