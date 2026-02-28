@@ -6,7 +6,12 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const supabase = createSupabaseServerClient();
-  const today = new Date().toISOString().split("T")[0];
+  // NHL game dates are in Eastern Time
+  const today = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "America/New_York" })
+  )
+    .toISOString()
+    .split("T")[0];
 
   const { data: games } = await supabase
     .from("games")
